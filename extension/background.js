@@ -1,63 +1,64 @@
 var API_KEY = null;
 const restoreOptions = () => {
     chrome.storage.sync.get(
-      { api_key: null},
-      (items) => {
-        API_KEY = items.api_key;
-        console.log("OpenAI api key loaded!"); 
-	}
+        { api_key: null },
+        (items) => {
+            API_KEY = items.api_key;
+            console.log("OpenAI api key loaded!");
+        }
     );
-  };
+};
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('received message: ', message);
     if (message.action === 'setBadge') {
         chrome.action.setBadgeText({ text: message.text });
-        chrome.action.setBadgeBackgroundColor({ color: message.color }); 
+        chrome.action.setBadgeBackgroundColor({ color: message.color });
     }
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'BUTTON_CLICKED') {
-      console.log('Button was clicked in the popup!');
+        const user_msg = message.user_input || "";
+        console.log('Button was clicked in the popup!');
 
-      chrome.tabs.captureVisibleTab(null, { format: 'png' }, function (dataUrl) {
-        if (chrome.runtime.lastError) {
-          console.error(chrome.runtime.lastError.message);
-          sendResponse({ screenshotUrl: null });
-          return;
-        }
-        
-        fetchChatCompletion(API_KEY, 'gpt-4o', "What can you see on the user image?",  null, dataUrl).then((response) => {
-            sendResponse({ message: response });
-    
-            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                chrome.scripting.executeScript({
-                  target: { tabId: tabs[0].id },
-                  function: (msg_txt) => alert(msg_txt),
-                  args: [response]
+        chrome.tabs.captureVisibleTab(null, { format: 'png' }, function (dataUrl) {
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError.message);
+                sendResponse({ screenshotUrl: null });
+                return;
+            }
+
+            fetchChatCompletion(API_KEY, 'gpt-4o', "Repeat the user message back to himself", null, null).then((response) => {
+                sendResponse({ message: response });
+
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.scripting.executeScript({
+                        target: { tabId: tabs[0].id },
+                        function: (msg_txt) => alert(msg_txt),
+                        args: [response]
+                    });
                 });
-              });
+            });
         });
-      });
 
-      
+
     }
     return true; // Keep the message channel open for the asynchronous response
-  });
+});
 
 
 // Fetch data from the OpenAI Chat Completion API
-async function fetchChatCompletion(apiKey, apiModel, system_prompt, user_prompt=null, user_image=null) {
+async function fetchChatCompletion(apiKey, apiModel, system_prompt, user_prompt = null, user_image = null) {
     let messages = [];
-    messages.push({"role": "system", "content": system_prompt});
-    let user_msg = {"role": "user", "content": []};
+    messages.push({ "role": "system", "content": system_prompt });
+    let user_msg = { "role": "user", "content": [] };
     if (user_prompt) {
-        user_msg.content.push({type: "text", "text": user_prompt});
+        user_msg.content.push({ type: "text", "text": user_prompt });
     }
     if (user_image) {
-        user_msg.content.push({type: "image_url", "image_url": {"url": user_image}});
+        user_msg.content.push({ type: "image_url", "image_url": { "url": user_image } });
     }
     messages.push(user_msg);
     console.log('attempting to fetch openai api');
@@ -94,6 +95,6 @@ async function fetchChatCompletion(apiKey, apiModel, system_prompt, user_prompt=
     }
 }
 
-(async function() {
-	restoreOptions(); 
+(async function () {
+    restoreOptions();
 })();

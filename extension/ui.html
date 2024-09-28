@@ -1,9 +1,19 @@
 <html>
   <head>
+    <meta charset="UTF-8">
     <script src="ui.js"></script>
+    <style>
+      body {
+        font-family: Inter;
+        min-width: 400px;
+        min-height: 300px;
+      }
+    </style>
   </head>
   <body>
-    <h1>Scam Shop Detector!</h1>
-    <button id="call-openai">Call openai</button>
+    <h1>Rozmawiaj ze stroną!</h1>
+    <textarea placeholder="Zaloguj się" id="user-input" style="width: 100%;"></textarea>
+    <br><br>
+    <button id="call-openai">Rozmawiaj</button>
   </body>
 </html>
