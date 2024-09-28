@@ -14,6 +14,9 @@
 		"storage",
 		"scripting"
 	],
+	"host_permissions": [
+        "https://api.openai.com/v1/completions"
+    ],
 	"content_scripts": [
 		{
 			"matches": [
