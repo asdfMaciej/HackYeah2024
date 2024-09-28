@@ -1,6 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "Scam Shop Detector",
+	"options_page": "options.html",
 	"description": "This extension will detect scam shops and warn you about them.",
 	"version": "0.1",
 	"action": {
@@ -9,7 +10,9 @@
 	},
 	"permissions": [
 		"tabs",
-		"activeTab"
+		"activeTab",
+		"storage",
+		"scripting"
 	],
 	"content_scripts": [
 		{
