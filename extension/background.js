@@ -23,57 +23,61 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const user_msg = message.user_input || "";
         console.log('Button was clicked in the popup!');
 
-        /*
-        chrome.tabs.captureVisibleTab(null, { format: 'png' }, function (dataUrl) {
-            if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError.message);
-                sendResponse({ screenshotUrl: null });
-                return;
-            }
 
-            // w dataUrl mamy obrazek - obecnie unused
-        });*/
+
 
         chrome.windows.getCurrent(w => {
-            chrome.tabs.query({ active: true, windowId: w.id }, function (tabs) {
-                chrome.scripting.executeScript({
-                    target: { tabId: tabs[0].id },
-                    function: getAllLinks, // Function to inject
-                    args: [] // Pass the CSS selector of the element
-                }).then((links_html_response) => {
-                    let links_html = links_html_response[0].result;
-                    system_prompt = `The user needs to: "${user_msg}".
-        What element should he click?
-        
-        1. Explain where the element is located on the page.
-        2. Write a CSS selector.
+            chrome.tabs.captureVisibleTab(w.id, { format: 'png' }, function (dataUrl) {
+                console.log('Captured visible tab:', dataUrl);
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message);
+                    sendResponse({ screenshotUrl: null });
+                    return;
+                }
 
-        The CSS selector should be unique and refer only to the provided HTML elements.
-        Do not use :contains. In order of preference, preferably use ID or href attributes. 
-        
-        You will receive a HTML webpage in the user message.`;
+                chrome.tabs.query({ active: true, windowId: w.id }, function (tabs) {
+                    chrome.scripting.executeScript({
+                        target: { tabId: tabs[0].id },
+                        function: getAllLinks, // Function to inject
+                        args: [] // Pass the CSS selector of the element
+                    }).then((links_html_response) => {
+                        let links_html = links_html_response[0].result;
+                        system_prompt = `The user needs to: "${user_msg}".
+            What element should he click?
+            
+            1. Explain where the element is located on the page.
+            2. Write a CSS selector.
+    
+            The CSS selector should be unique and refer only to the provided HTML elements.
+            Do not use :contains. In order of preference, preferably use ID or href attributes. 
+            You can refer to the image for spatial awareness.
+            
+            You will receive a HTML webpage in the user message.`;
 
-                    console.log('attempting to prompt with', system_prompt, links_html);
+                        console.log('attempting to prompt with', system_prompt, links_html);
 
-                    fetchChatCompletion(API_KEY, 'gpt-4o-2024-08-06', system_prompt, links_html, null).then((response) => {
-                        sendResponse({ message: response });
+                        fetchChatCompletion(API_KEY, 'gpt-4o-2024-08-06', system_prompt, links_html, dataUrl).then((response) => {
+                            sendResponse({ message: response });
 
 
-                        // response to json
-                        response = JSON.parse(response);
+                            // response to json
+                            response = JSON.parse(response);
 
-                        console.log('Moj CSS selector to ' + response.css_selector);
-                        console.log(response);
-                        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                            chrome.scripting.executeScript({
-                                target: { tabId: tabs[0].id },
-                                function: triggerClickOnElement,
-                                args: [response.css_selector]
+                            console.log('Moj CSS selector to ' + response.css_selector);
+                            console.log(response);
+                            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                                chrome.scripting.executeScript({
+                                    target: { tabId: tabs[0].id },
+                                    function: triggerClickOnElement,
+                                    args: [response.css_selector]
+                                });
                             });
                         });
                     });
                 });
             });
+
+
         });
 
 
