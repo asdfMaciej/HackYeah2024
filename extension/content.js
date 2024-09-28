@@ -11,6 +11,11 @@ const restoreOptions = () => {
   );
 };
 
+chrome.runtime.onMessage.addListener(function (data) {
+  console.log('pozdrowienia z content.js', data);
+  //sendResponse({result: "success"});
+});
+
 
 (async function () {
   restoreOptions(); // GET API key

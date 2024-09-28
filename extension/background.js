@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 return;
             }
 
-            fetchChatCompletion(API_KEY, 'gpt-4o', "Repeat the user message back to himself", null, null).then((response) => {
+            fetchChatCompletion(API_KEY, 'gpt-4o', "Repeat the user message back to himself translated to English", user_msg, null).then((response) => {
                 sendResponse({ message: response });
 
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -42,11 +42,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 });
             });
         });
+    }
 
-
+    if (message.type === 'TEST_BUTTON') {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                function: triggerClickOnElement, // Function to inject
+                args: ['a[href="https://usosweb.put.poznan.pl/kontroler.php?_action=logowaniecas/index"]'] // Pass the CSS selector of the element
+            });
+        });
     }
     return true; // Keep the message channel open for the asynchronous response
 });
+
+function triggerClickOnElement(selector) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.click(); // Trigger the click event
+        console.log('Element clicked:', element);
+    } else {
+        console.error('Element not found:', selector);
+    }
+}
 
 
 // Fetch data from the OpenAI Chat Completion API

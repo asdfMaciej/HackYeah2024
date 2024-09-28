@@ -7,4 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('response from bg script', response.message); // Response from background script
     });
   });
+
+  document.getElementById("test").addEventListener('click', function () {
+    chrome.runtime.sendMessage({ type: 'TEST_BUTTON' });
+  });
 });
