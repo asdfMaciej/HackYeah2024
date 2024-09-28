@@ -29,14 +29,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           return;
         }
         
-        fetchChatCompletion([{"role": "system", "content": "What can you see on the user image?"}, {"role": "user", "content": [
-            {type: "text", "text": ""},
-            {type: "image_url", "image_url": {url: dataUrl}}
-        ]
-        }], 
-            API_KEY, 
-            'gpt-4o'
-        ).then((response) => {
+        fetchChatCompletion(API_KEY, 'gpt-4o', "What can you see on the user image?",  null, dataUrl).then((response) => {
             sendResponse({ message: response });
     
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -56,7 +49,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 
 // Fetch data from the OpenAI Chat Completion API
-async function fetchChatCompletion(messages, apiKey, apiModel) {
+async function fetchChatCompletion(apiKey, apiModel, system_prompt, user_prompt=null, user_image=null) {
+    let messages = [];
+    messages.push({"role": "system", "content": system_prompt});
+    let user_msg = {"role": "user", "content": []};
+    if (user_prompt) {
+        user_msg.content.push({type: "text", "text": user_prompt});
+    }
+    if (user_image) {
+        user_msg.content.push({type: "image_url", "image_url": {"url": user_image}});
+    }
+    messages.push(user_msg);
     console.log('attempting to fetch openai api');
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
