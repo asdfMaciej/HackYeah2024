@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   button.addEventListener('click', function () {
     document.getElementById("response").innerHTML = 'Thinking...';
+    document.getElementById("thoughts").innerHTML = '';
     // Send a message to the background script
     chrome.runtime.sendMessage({ type: 'BUTTON_CLICKED', user_input: document.querySelector("#user-input").value }, function (response) {
       console.log('response from bg script', response.message); // Response from background script
