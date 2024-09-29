@@ -1091,15 +1091,20 @@ ${website_markdown[0].result}`;
 
 function answer_user_question(user_msg, function_callback) {
     chrome.windows.getCurrent(w => {
-
-        chrome.tabs.query({ active: true, windowId: w.id }, function (tabs) {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                function: getMarkdown, // Function to inject
-                args: [] // Pass the CSS selector of the element
-            }).then((website_markdown) => {
-                console.log(website_markdown[0].result);
-                system_prompt = `You are a website assistant. Answer user query based on the website content.
+        chrome.tabs.captureVisibleTab(w.id, { format: 'png' }, function (dataUrl) {
+            console.log('Captured visible tab:', dataUrl);
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError.message);
+                return;
+            }
+            chrome.tabs.query({ active: true, windowId: w.id }, function (tabs) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    function: getMarkdown, // Function to inject
+                    args: [] // Pass the CSS selector of the element
+                }).then((website_markdown) => {
+                    console.log(website_markdown[0].result);
+                    system_prompt = `You are a website assistant. Answer user query based on the website content.
 
 
 Answer solely based on the website content or the provided image. Do not use external sources.
@@ -1107,17 +1112,17 @@ The website content is:
 [WEBSITE CONTENT]
 ${website_markdown[0].result}`;
 
-                console.log('attempting to prompt with', system_prompt, user_msg);
+                    console.log('attempting to prompt with', system_prompt, user_msg);
 
-                fetchChatCompletion(API_KEY, 'gpt-4o-2024-08-06', system_prompt, user_msg, null, get_response_format_mega_superasna_odpowiedz()).then((response) => {
-                    // response to json
-                    response = JSON.parse(response);
-                    console.log(response);
-                    function_callback(response);
+                    fetchChatCompletion(API_KEY, 'gpt-4o-2024-08-06', system_prompt, user_msg, dataUrl, get_response_format_mega_superasna_odpowiedz()).then((response) => {
+                        // response to json
+                        response = JSON.parse(response);
+                        console.log(response);
+                        function_callback(response);
+                    });
                 });
             });
         });
-
 
     });
 }
