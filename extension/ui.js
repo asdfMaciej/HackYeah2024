@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  /*
   document.getElementById("test").addEventListener('click', function () {
     chrome.runtime.sendMessage({ type: 'TEST_BUTTON' });
   });
+  */
 });
