@@ -1,8 +1,8 @@
 ![eAssistant](https://github.com/user-attachments/assets/17e7868f-d1c1-411a-8f60-91052eb74309)
 
-## Chrome extension for interacting with websites
+## Navigate and search through websites using LLMs
 
-Created for Hack Yeah 2024 in the Artificial Intelligence task.
+Chrome extension created for Hack Yeah 2024 in the Artificial Intelligence task.
 
 ## Setup
 
