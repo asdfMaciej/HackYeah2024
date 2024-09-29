@@ -1182,6 +1182,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             const intent = response.message_intent;
             if (intent === 'action') {
                 clickUserElement(user_msg, (response) => {
+                    //if (response.css_selector) {
+                    // TODO: Element not found
                     sendResponse({ message: `I clicked an element identified by ${response.css_selector}` });
                 });
             } else {

@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
-	"name": "Scam Shop Detector",
+	"name": "eAssistant",
 	"options_page": "options.html",
-	"description": "This extension will detect scam shops and warn you about them.",
+	"description": "This extension will help you navigate and talk with websites.",
 	"version": "0.1",
 	"action": {
 		"default_popup": "ui.html",

@@ -22,7 +22,7 @@ const restoreOptions = () => {
     { api_key: null },
     (items) => {
       console.log("api key: " + items.api_key);
-      document.querySelector("#openai_api_key_status").innerHTML = items.api_key ? "Ustawiono klucz API OpenAI, możesz korzystać ze wtyczki!" : "Ustaw klucz API OpenAI!";
+      document.querySelector("#openai_api_key_status").innerHTML = items.api_key ? "All OK! The OpenAI API key is configured :)" : "Set the OpenAI API key!";
     }
   );
 };

@@ -1,17 +1,70 @@
 <!DOCTYPE html>
 <html lang="pl-PL">
-  <head>
-    <meta charset="UTF-8">
-    <title>My Test Extension Options</title>
-  </head>
-  <body>
-    <input type="password" id="openai_api_key" placeholder="Klucz API OpenAI">
-    <label id="openai_api_key_status"></label>
 
-    <div id="status"></div>
-    <button id="save">Save</button>
+<head>
+  <meta charset="UTF-8">
+  <title>eAssistant Options</title>
 
-    <script src="options.js"></script>
-  </body>
+  <style>
+    body {
+      font-family: Inter, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      min-height: 300px;
+      font-size: 1.1em;
+      padding-top: 2em;
+    }
+
+    input,
+    button {
+      font-size: 0.9em;
+      height: 2em;
+    }
+
+    input {
+      background: white;
+      border: 1px solid grey;
+      padding: 5px 10px;
+      margin-top: 1em;
+      margin-bottom: 0.5em;
+      ;
+    }
+
+    button {
+      padding: 10px 15px;
+      height: 3.5em;
+      background: #ef0000;
+      color: white;
+      border: 0;
+    }
+
+    #openai_api_key_status {
+      display: block;
+      margin-top: 0.5em;
+      margin-bottom: 2em;
+    }
+
+    /* #ef0000 */
+
+
+
+    * {
+      font-family: Inter, sans-serif;
+    }
+  </style>
+
+</head>
+
+<body>
+  <img src="logo.png">
+  <br>
+
+  <input type="password" id="openai_api_key" placeholder="OpenAI API key" style="width: 100%"><br>
+  <label id="openai_api_key_status"></label>
+  <div id="status"></div>
+  <button id="save">Save settings</button>
+
+  <script src="options.js"></script>
+</body>
+
 </html>
-
