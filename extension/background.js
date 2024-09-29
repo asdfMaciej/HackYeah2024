@@ -1033,10 +1033,11 @@ function clickUserElement(user_msg, function_callback) {
                     console.log('attempting to prompt with', system_prompt, links_html);
 
                     fetchChatCompletion(API_KEY, 'gpt-4o-2024-08-06', system_prompt, links_html, dataUrl, get_response_format('css_selector')).then((response) => {
-                        function_callback(response);
+
 
                         // response to json
                         response = JSON.parse(response);
+                        function_callback(response);
 
                         console.log('Moj CSS selector to ' + response.css_selector);
                         console.log(response);
@@ -1047,6 +1048,51 @@ function clickUserElement(user_msg, function_callback) {
                                 args: [response.css_selector]
                             });
                         });
+                    });
+                });
+            });
+        });
+
+
+    });
+}
+
+function searchUserElement(user_msg, function_callback) {
+    chrome.windows.getCurrent(w => {
+        chrome.tabs.captureVisibleTab(w.id, { format: 'png' }, function (dataUrl) {
+            console.log('Captured visible tab:', dataUrl);
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError.message);
+                return;
+            }
+
+            chrome.tabs.query({ active: true, windowId: w.id }, function (tabs) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    function: getMarkdown, // Function to inject
+                    args: [] // Pass the CSS selector of the element
+                }).then((markdown_response) => {
+                    let markdown = markdown_response[0].result;
+                    system_prompt = `The user is looking for: "${user_msg}".
+        The answer is not available on the current page.
+        Is there an element on the website which should he click, that could lead to the answer?
+        
+        
+        1. Explain which elements could be clicked and why.
+        2. Determine if any element could be clicked.
+
+        If yes:
+        3. Concisely descripe the suitable element.
+
+        You will receive a webpage in the user message.`;
+
+                    console.log('attempting to prompt with', system_prompt, markdown);
+
+                    fetchChatCompletion(API_KEY, 'gpt-4o-2024-08-06', system_prompt, markdown, dataUrl, get_response_format_jaki_motyw()).then((response) => {
+
+                        // response to json
+                        response = JSON.parse(response);
+                        function_callback(response);
                     });
                 });
             });
@@ -1136,15 +1182,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             const intent = response.message_intent;
             if (intent === 'action') {
                 clickUserElement(user_msg, (response) => {
-                    sendResponse({ message: response });
+                    sendResponse({ message: `I clicked an element identified by ${response.css_selector}` });
                 });
             } else {
                 answer_user_question(user_msg, (response) => {
                     console.log(response);
-                    if (response.can_be_answered) {
+                    if (response.website_contains_answer) {
                         sendResponse({ message: response.answer });
                     } else {
-                        sendResponse({ message: "I'm sorry, I can't answer that question - " + response.chain_of_thought });
+                        // The answer cannot be found and its described in response.chain_of_thought why
+                        let response_txt = "I can't answer that question on the current page: " + response.chain_of_thought + "\n";
+                        searchUserElement(user_msg, (response) => {
+                            console.log(response);
+                            if (response.good_element_candidate_exists) {
+                                response_txt += "\n" + "However, an element could potentially lead to the answer: " + response.element_candidate_description;
+                                clickUserElement(response.element_candidate_description, (response) => {
+                                    response_txt += "\n" + `I clicked an element identified by ${response.css_selector}`;
+                                    sendResponse({ message: response_txt });
+                                });
+                            } else {
+                                response_txt += "\n" + "We couldn't find any leads for suitable webpages. " + response.potential_elements_thoughts;
+                                sendResponse({ message: response_txt });
+                            }
+
+                        });
                     }
 
                 });
@@ -1266,14 +1327,42 @@ function get_response_format_mega_superasna_odpowiedz() {
                     "chain_of_thought": {
                         "type": "string"
                     },
-                    "can_be_answered": {
+                    "website_contains_answer": {
                         "type": "boolean"
                     },
                     "answer": {
                         "type": "string"
                     }
                 },
-                "required": ["chain_of_thought", "can_be_answered", "answer"],
+                "required": ["chain_of_thought", "website_contains_answer", "answer"],
+                "additionalProperties": false
+            }
+        }
+    }
+
+    return format;
+}
+
+function get_response_format_jaki_motyw() {
+    format = {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "question_answer",
+            "strict": true,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "potential_elements_thoughts": {
+                        "type": "string"
+                    },
+                    "good_element_candidate_exists": {
+                        "type": "boolean"
+                    },
+                    "element_candidate_description": {
+                        "type": "string"
+                    }
+                },
+                "required": ["potential_elements_thoughts", "good_element_candidate_exists", "element_candidate_description"],
                 "additionalProperties": false
             }
         }
