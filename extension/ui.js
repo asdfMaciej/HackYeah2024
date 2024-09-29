@@ -23,14 +23,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function addUserMessage(message) {
   let messageBox = document.createElement('div');
+  // Convert nl2br
+  message = message.replace(/\n/g, '<br>');
   messageBox.className = 'message user';
   messageBox.innerHTML = message;
+
   document.getElementById('chat').appendChild(messageBox);
   document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
 }
 
 function addBotMessage(message) {
   let messageBox = document.createElement('div');
+  message = message.replace(/\n/g, '<br>');
   messageBox.className = 'message bot';
   messageBox.innerHTML = message;
   document.getElementById('chat').appendChild(messageBox);

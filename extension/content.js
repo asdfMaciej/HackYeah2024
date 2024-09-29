@@ -1,6 +1,3 @@
-API_URL = 'http://localhost:5000';
-
-
 var API_KEY = null;
 const restoreOptions = () => {
   chrome.storage.sync.get(
@@ -19,5 +16,4 @@ chrome.runtime.onMessage.addListener(function (data) {
 
 (async function () {
   restoreOptions(); // GET API key
-  chrome.runtime.sendMessage({ action: 'setBadge', text: `...`, color: '#C6A0F6' });
 })();
