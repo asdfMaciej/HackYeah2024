@@ -6,7 +6,7 @@ Chrome extension created for Hack Yeah 2024 in the Artificial Intelligence task.
 
 ## Setup
 
-1. Download the extension repository;
+1. Download the [latest extension source code](https://github.com/asdfMaciej/HackYeah2024/releases/);
 2. Navigate to `chrome://extensions`, turn on Dev Mode and load the `extension` directory;
 3. Setup the OpenAI API Key in extension settings (the key should have access to gpt-4o);
 4. The extension should be available on any given website as a red button in the navbar!
